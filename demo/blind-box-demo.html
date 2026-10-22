@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>盲盒旅行规划师 — Demo 演示</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif; background: #f5f0eb; color: #2d2a26; }
+  .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+  /* Header */
+  .header { text-align: center; padding: 40px 20px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin-bottom: 30px; color: white; }
+  .header h1 { font-size: 28px; margin-bottom: 8px; }
+  .header p { opacity: 0.85; font-size: 14px; }
+  .badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px; }
+
+  /* Chat bubbles */
+  .chat { margin-bottom: 24px; }
+  .msg { margin-bottom: 16px; display: flex; gap: 10px; }
+  .msg.user { flex-direction: row-reverse; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .msg.user .avatar { background: #667eea; }
+  .msg.bot .avatar { background: #f0e6d3; }
+  .bubble { max-width: 85%; padding: 14px 18px; border-radius: 16px; line-height: 1.7; font-size: 14px; }
+  .msg.user .bubble { background: #667eea; color: white; border-bottom-right-radius: 4px; }
+  .msg.bot .bubble { background: white; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+  /* Surprise meter */
+  .surprise-meter { background: white; border-radius: 16px; padding: 20px; margin: 24px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .surprise-meter h3 { font-size: 14px; color: #888; margin-bottom: 12px; }
+  .meter-bar { height: 12px; background: #eee; border-radius: 6px; overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+  .meter-labels { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; margin-top: 6px; }
+  .surprise-value { text-align: center; font-size: 32px; font-weight: 700; margin: 8px 0; }
+
+  /* Blind box */
+  .blind-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 20px; padding: 30px; margin: 30px 0; color: white; text-align: center; position: relative; overflow: hidden; }
+  .blind-box::before { content: '🎁'; font-size: 60px; display: block; margin-bottom: 10px; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-10px); } }
+  .blind-box h2 { font-size: 22px; margin-bottom: 6px; }
+  .blind-box p { opacity: 0.9; font-size: 14px; }
+
+  /* Reveal section */
+  .reveal { background: white; border-radius: 20px; overflow: hidden; margin: 30px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .reveal-header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 24px; color: white; text-align: center; }
+  .reveal-header h2 { font-size: 22px; }
+  .reveal-header p { opacity: 0.9; font-size: 13px; margin-top: 4px; }
+
+  /* Itinerary */
+  .day-section { padding: 24px; border-bottom: 1px solid #f0f0f0; }
+  .day-section:last-child { border-bottom: none; }
+  .day-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .day-title span { background: #667eea; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; }
+
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; background: #e8e4df; }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-item::before { content: ''; position: absolute; left: -20px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: #667eea; border: 2px solid white; box-shadow: 0 0 0 2px #667eea; }
+  .time-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .event-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .event-desc { font-size: 13px; color: #666; line-height: 1.6; }
+
+  /* Cards */
+  .card { background: #faf8f5; border-radius: 12px; padding: 16px; margin: 12px 0; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .card-price { font-size: 16px; font-weight: 700; color: #f5576c; }
+  .card-meta { font-size: 12px; color: #888; }
+  .card img { width: 100%; border-radius: 8px; margin: 8px 0; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag { background: #ede9e3; padding: 3px 10px; border-radius: 12px; font-size: 11px; color: #666; }
+  .tag.free { background: #d4edda; color: #155724; }
+  .tag.score { background: #fff3cd; color: #856404; }
+
+  /* Booking button */
+  .book-btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 13px; margin-top: 8px; }
+
+  /* Summary */
+  .summary { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); border-radius: 20px; padding: 24px; margin: 30px 0; }
+  .summary h3 { font-size: 18px; margin-bottom: 16px; color: #333; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .summary-item { background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; text-align: center; }
+  .summary-item .label { font-size: 12px; color: #888; }
+  .summary-item .value { font-size: 20px; font-weight: 700; color: #333; margin-top: 4px; }
+
+  /* Tips */
+  .tips { background: white; border-radius: 16px; padding: 20px; margin: 24px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .tips h3 { font-size: 16px; margin-bottom: 12px; }
+  .tips ul { list-style: none; }
+  .tips li { padding: 6px 0; font-size: 13px; color: #555; display: flex; gap: 8px; }
+  .tips li::before { content: '💡'; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 30px; color: #aaa; font-size: 12px; }
+  .footer a { color: #667eea; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🎲 盲盒旅行规划师</h1>
+    <p>告诉我预算和时间，剩下的交给我和命运</p>
+    <div class="badge">Powered by FlyAI × 百炼 Managed Agent</div>
+  </div>
+
+  <!-- Phase 1: Profile Collection -->
+  <div class="chat">
+    <div class="msg bot">
+      <div class="avatar">🎲</div>
+      <div class="bubble">
+        嗨！我是你的盲盒旅行规划师 🎁<br><br>
+        告诉我三件事，我会为你密封一份惊喜行程——出发前才揭晓！<br><br>
+        1️⃣ 预算大概多少？<br>
+        2️⃣ 想玩几天？<br>
+        3️⃣ 有什么偏好或雷区？（比如不吃辣、恐高、想看海……）
+      </div>
+    </div>
+    <div class="msg user">
+      <div class="avatar">🙋</div>
+      <div class="bubble">
+        预算 2000 左右吧，周末两天一晚，从杭州出发。<br>
+        喜欢吃！最好能吃到地道的小吃。不想太赶，轻松一点。
+      </div>
+    </div>
+    <div class="msg bot">
+      <div class="avatar">🎲</div>
+      <div class="bubble">
+        收到！让我帮你画个像 📋<br><br>
+        ✅ 预算：~2000元<br>
+        ✅ 时间：2天1晚（周末）<br>
+        ✅ 出发地：杭州<br>
+        ✅ 偏好：美食探索、轻松节奏<br><br>
+        正在为你搜索最优目的地和行程方案……🔍
+      </div>
+    </div>
+  </div>
+
+  <!-- Surprise Meter -->
+  <div class="surprise-meter">
+    <h3>🎯 当前惊喜值</h3>
+    <div class="surprise-value" style="color: #667eea;">100</div>
+    <div class="meter-bar">
+      <div class="meter-fill" style="width: 100%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+    </div>
+    <div class="meter-labels">
+      <span>0 无惊喜</span>
+      <span>80-119 命运低语</span>
+      <span>120+ 命运宠儿</span>
+    </div>
+  </div>
+
+  <!-- Phase 2: Smart Planning -->
+  <div class="chat">
+    <div class="msg bot">
+      <div class="avatar">🎲</div>
+      <div class="bubble">
+        经过飞猪实时搜索，我找到了一个超棒的目的地——<br><br>
+        🏙️ <strong>长沙</strong><br><br>
+        为什么是长沙？<br>
+        ✈️ 杭州直飞仅 1h40m，机票低至 ¥310<br>
+        🚄 高铁直达 3h13m，班次密集<br>
+        🍜 全国美食天花板：臭豆腐、糖油粑粑、小龙虾<br>
+        🏛️ 橘子洲、岳麓山、湖南博物院——全免费！<br><br>
+        你的 2000 预算在这里能玩得非常舒服 😎<br><br>
+        要不要偷看一眼目的地？（惊喜值 -30）<br>
+        还是忍住诱惑，保持神秘？（惊喜值 +20）
+      </div>
+    </div>
+    <div class="msg user">
+      <div class="avatar">🙋</div>
+      <div class="bubble">
+        忍住！不偷看！我要完整的惊喜 🎁
+      </div>
+    </div>
+  </div>
+
+  <!-- Surprise Meter Updated -->
+  <div class="surprise-meter">
+    <h3>🎯 惊喜值更新</h3>
+    <div class="surprise-value" style="color: #43e97b;">120 🔥</div>
+    <div class="meter-bar">
+      <div class="meter-fill" style="width: 100%; background: linear-gradient(90deg, #43e97b, #38f9d7);"></div>
+    </div>
+    <div class="meter-labels">
+      <span>0 无惊喜</span>
+      <span>80-119 命运低语</span>
+      <span>✨ 120+ 命运宠儿！</span>
+    </div>
+    <p style="text-align: center; margin-top: 10px; font-size: 13px; color: #43e97b; font-weight: 600;">
+      🎊 触发「命运宠儿」预言！你将获得一份特别彩蛋行程~
+    </p>
+  </div>
+
+  <!-- Phase 3: Blind Box Delivery -->
+  <div class="blind-box">
+    <h2>📦 盲盒已密封！</h2>
+    <p>2天1晚 · 杭州出发 · 美食文化之旅</p>
+    <p style="margin-top: 12px; font-size: 13px; opacity: 0.8;">
+      含往返交通 + 精选酒店 + 5个宝藏景点 + 美食地图<br>
+      预计花费：~¥1,880（预算内！）
+    </p>
+    <p style="margin-top: 16px; font-size: 16px;">
+      准备好揭晓了吗？说「打开盲盒」🎁
+    </p>
+  </div>
+
+  <div class="chat">
+    <div class="msg user">
+      <div class="avatar">🙋</div>
+      <div class="bubble">打开盲盒！！🎁🎁🎁</div>
+    </div>
+  </div>
+
+  <!-- Phase 4: Reveal -->
+  <div class="reveal">
+    <div class="reveal-header">
+      <h2>🎉 盲盒揭晓！</h2>
+      <p>你的专属长沙周末美食文化之旅</p>
+    </div>
+
+    <!-- Day 1 -->
+    <div class="day-section">
+      <div class="day-title">
+        <span>DAY 1</span> 10月25日 周六 — 初见星城
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="time-label">09:15 - 10:55</div>
+          <div class="event-title">✈️ 去程：长龙航空 GJ8777</div>
+          <div class="event-desc">
+            杭州萧山 T3 → 长沙黄花 T1<br>
+            直飞 1h40m · 经济舱 · 准点率 100%
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">长龙航空 GJ8777</div>
+              <div class="card-price">¥310</div>
+            </div>
+            <div class="card-meta">萧山机场T3 09:15 → 黄花机场T1 10:55 | 空客A320 | 1h40m</div>
+            <a class="book-btn" href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F2ykYQE" target="_blank">点击预订机票</a>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">11:30 - 13:00</div>
+          <div class="event-title">🍜 午餐：坡子街美食街</div>
+          <div class="event-desc">
+            到达长沙后直奔坡子街！1200年历史的千年老街，长沙小吃的灵魂所在。<br>
+            必吃清单：火宫殿臭豆腐、糖油粑粑、口味虾
+          </div>
+          <div class="card">
+            <div class="card-title">坡子街</div>
+            <img src="https://img.alicdn.com/imgextra/i2/O1CN011d3wTzR4iVxhXFp_!!0-travel.jpg" alt="坡子街">
+            <div class="card-meta">📍 天心区坡子街 | 全天开放 | 1200年历史老街</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.6</span>
+              <span class="tag">湖南特色街区第1名</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">14:00 - 17:00</div>
+          <div class="event-title">🏛️ 湖南博物院</div>
+          <div class="event-desc">
+            马王堆汉墓文物的家！薄如蝉翼的素纱单衣、两千年不腐的辛追夫人……这里是湖南文化的宝库。<br>
+            ⏰ 建议预留 2-3 小时
+          </div>
+          <div class="card">
+            <div class="card-title">湖南博物院</div>
+            <img src="https://img.alicdn.com/imgextra/i2/6000000003655/O1CN01eCaE931cs2ReqCwIZ_!!6000000003655-0-fliggyimage.jpg" alt="湖南博物院">
+            <div class="card-meta">📍 开福区东风路50号 | 周二至周日 09:00-17:00</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.7</span>
+              <span class="tag">湖南亲子景点第1名</span>
+            </div>
+            <a class="book-btn" href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F2YNZFN" target="_blank">查看详情</a>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">17:30</div>
+          <div class="event-title">🏨 入住：长沙君悦酒店</div>
+          <div class="event-desc">
+            就在五一广场旁边！步行可达太平街、黄兴路步行街。<br>
+            豪华型 · 评分4.7"超棒" · 俯瞰湘江夜景
+          </div>
+          <div class="card">
+            <div class="card-title">长沙君悦酒店</div>
+            <img src="https://img.alicdn.com/imgextra/i3/6000000000913/O1CN01wNs98K1IJspZpJ6VH_!!6000000000913-0-fliggyimage.jpg" alt="长沙君悦酒店">
+            <div class="card-header" style="margin-top: 8px;">
+              <div class="card-meta">📍 湘江中路288号 | 近五一广场</div>
+              <div class="card-price">¥567/晚</div>
+            </div>
+            <div class="card-tags">
+              <span class="tag score">⭐ 4.7 超棒</span>
+              <span class="tag">豪华型</span>
+              <span class="tag">近地铁</span>
+            </div>
+            <a class="book-btn" href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F3Q3zKx" target="_blank">点击预订酒店</a>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">19:00 - 21:00</div>
+          <div class="event-title">🌙 太平街夜游 + 晚餐</div>
+          <div class="event-desc">
+            青瓦白墙的老街，灯火阑珊中品尝地道长沙宵夜。贾谊故居就在这条街上。<br>
+            推荐：茶颜悦色、文和友老长沙大香肠
+          </div>
+          <div class="card">
+            <div class="card-title">太平街</div>
+            <img src="https://img.alicdn.com/imgextra/i1/6000000006719/O1CN01K8HxkT1zVLlPunixL_!!6000000006719-0-fliggyimage.jpg" alt="太平街">
+            <div class="card-meta">📍 天心区坡子街街道 | 全天开放</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.6</span>
+              <span class="tag">湖南特色街区第4名</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-section">
+      <div class="day-title">
+        <span>DAY 2</span> 10月26日 周日 — 山水人文
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="time-label">08:00 - 11:00</div>
+          <div class="event-title">⛰️ 岳麓山 + 爱晚亭 + 岳麓书院</div>
+          <div class="event-desc">
+            长沙地标！千年学府岳麓书院、中国四大名亭之一的爱晚亭。<br>
+            秋天正是赏红叶的好时候🍁 建议从南大门进，一路走到山顶。
+          </div>
+          <div class="card">
+            <div class="card-title">岳麓山国家重点风景名胜区</div>
+            <img src="https://img.alicdn.com/tfscom/TB1Vp9XijnD8KJjSspbSuvbEXXa" alt="岳麓山">
+            <div class="card-meta">📍 岳麓区登高路58号 | 每日 06:00-22:00</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.6</span>
+              <span class="tag">5A景区</span>
+            </div>
+            <a class="book-btn" href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F0Ut4j3" target="_blank">查看详情</a>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">11:30 - 13:30</div>
+          <div class="event-title">🍽️ 午餐：湘菜馆</div>
+          <div class="event-desc">
+            在岳麓山附近找一家本地人推荐的湘菜馆，试试剁椒鱼头、小炒黄牛肉、农家小炒肉。<br>
+            人均约 ¥60-80
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">14:00 - 16:00</div>
+          <div class="event-title">🏝️ 橘子洲头</div>
+          <div class="event-desc">
+            「独立寒秋，湘江北去，橘子洲头」——毛泽东笔下的壮丽景色。<br>
+            坐小火车游览全程，在毛泽东青年雕塑前打卡📸 湘江两岸风光尽收眼底。
+          </div>
+          <div class="card">
+            <div class="card-title">橘子洲景区</div>
+            <img src="https://img.alicdn.com/tfscom/TB1SCipKYY1gK0jSZTESutDQVXa" alt="橘子洲">
+            <div class="card-meta">📍 岳麓区桔子洲街道 | 每日 07:00-22:00</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.6</span>
+              <span class="tag">湖南近期飙升景点第1名</span>
+              <span class="tag">5A景区</span>
+            </div>
+            <a class="book-btn" href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F27v3Lo" target="_blank">查看详情</a>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">16:30</div>
+          <div class="event-title">📍 五一广场打卡</div>
+          <div class="event-desc">
+            长沙千年古城的地理坐标，现代商业的心脏。在返程前感受一下城市的烟火气。
+          </div>
+          <div class="card">
+            <div class="card-title">五一广场</div>
+            <img src="https://img.alicdn.com/imgextra/i4/659290/TB25dC9hpXXXXbEXpXXXXXXXXXX_!!659290-0-travel.jpg" alt="五一广场">
+            <div class="card-meta">📍 芙蓉区黄兴中路88号 | 全年全天开放</div>
+            <div class="card-tags">
+              <span class="tag free">免费</span>
+              <span class="tag score">⭐ 4.7</span>
+              <span class="tag">湖南地标第1名</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="time-label">18:00+</div>
+          <div class="event-title">🚄 返程：高铁回杭州</div>
+          <div class="event-desc">
+            长沙南站 → 杭州东站，约 3h13m<br>
+            推荐 G231（18:01→21:14）或 G205（07:47→11:00 如选早班）<br>
+            在车上回味这两天的美食和风景 🌅
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🚄 G231 高铁</div>
+              <div class="card-price">约¥405</div>
+            </div>
+            <div class="card-meta">杭州东→长沙南 3h13m | 二等座 | 班次密集</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget Summary -->
+  <div class="summary">
+    <h3>💰 预算明细</h3>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="label">去程机票</div>
+        <div class="value">¥310</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">返程高铁</div>
+        <div class="value">¥405</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">酒店（1晚）</div>
+        <div class="value">¥567</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">餐饮（4顿）</div>
+        <div class="value">¥300</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">景点门票</div>
+        <div class="value" style="color: #43e97b;">¥0</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">交通+其他</div>
+        <div class="value">¥200</div>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 2px dashed rgba(0,0,0,0.1);">
+      <div class="label" style="font-size: 14px; color: #666;">总计</div>
+      <div style="font-size: 28px; font-weight: 700; color: #f5576c;">¥1,782</div>
+      <div style="font-size: 13px; color: #43e97b; margin-top: 4px;">✅ 预算内！还剩 ¥218 买特产~</div>
+    </div>
+  </div>
+
+  <!-- Phase 5: Travel Tips -->
+  <div class="tips">
+    <h3>📋 行前锦囊</h3>
+    <ul>
+      <li>湖南博物院需提前在官网预约，周一闭馆，注意安排时间</li>
+      <li>长沙秋天早晚温差大（15-25°C），建议带一件薄外套</li>
+      <li>坡子街和太平街晚上更热闹，建议 Day1 下午先去博物院</li>
+      <li>茶颜悦色推荐「幽兰拿铁」和「声声乌龙」，长沙限定！</li>
+      <li>橘子洲可坐小火车（往返 ¥20），全程步行约 6 公里</li>
+      <li>🎊 命运宠儿彩蛋：留一个下午自由时间，走进一家不在计划里的店，让直觉带你！</li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>🎲 盲盒旅行规划师 — Demo 演示</p>
+    <p>数据来源：<a href="https://flyai.open.fliggy.com">FlyAI 飞猪AI开放平台</a> 实时搜索</p>
+    <p style="margin-top: 8px;">2026 飞猪AI旅行创新大赛参赛作品</p>
+  </div>
+
+</div>
+</body>
+</html>
