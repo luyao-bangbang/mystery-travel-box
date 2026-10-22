@@ -2,6 +2,8 @@
 
 > **2026 飞猪 AI 旅行创新大赛参赛作品**
 
+> 🎬 **在线 Demo（真实飞猪数据）：https://luyao-bangbang.github.io/mystery-travel-box/**
+
 一款基于阿里云百炼平台 + 飞猪官方 Skill 的 AI 旅行智能体。用户只需提供预算、时间和偏好，即可获得一份密封的「盲盒行程」——目的地保密到最后一刻才揭晓。
 
 ## ✨ 核心体验
@@ -60,9 +62,10 @@ mystery-travel-box/
 
 ## 🎬 Demo 演示
 
-打开 [`demo/blind-box-demo.html`](demo/blind-box-demo.html) 查看完整的盲盒旅行体验演示。
+- 🌐 **在线体验（推荐）**：https://luyao-bangbang.github.io/mystery-travel-box/
+- 💻 **本地文件**：[`demo/blind-box-demo.html`](demo/blind-box-demo.html)（可直接浏览器打开）
 
-所有数据均来自飞猪 FlyAI 实时搜索结果，包括真实机票、酒店、景点信息和预订链接。
+所有数据均来自飞猪 FlyAI 实时搜索结果，包括真实机票（GJ8777 ¥310）、酒店（¥567）、5 个免费景点和预订链接。完整长沙 2 日游盲盒行程，总预算 ¥1,782 / ¥2,000。
 
 ## 🎮 核心功能
 
