@@ -1,0 +1,98 @@
+{
+  "name": "盲盒旅行规划师",
+  "name_en": "Mystery Travel Box",
+  "description": "AI-powered travel surprise agent — users provide budget, time and preferences; the agent plans a complete secret itinerary revealed only before departure.",
+  "platform": "阿里云百炼 Managed Agent",
+  "model": "qwen-max (推荐) / qwen-plus",
+  "skills": [
+    {
+      "name": "flyai-skill",
+      "install_command": "npx skills add alibaba-flyai/flyai-skill",
+      "source": "https://flyai.open.fliggy.com/",
+      "description": "FlyAI connects to Fliggy MCP for real-time travel search and booking",
+      "capabilities": [
+        {
+          "command": "search-flight",
+          "description": "Search flights with filters: origin, destination, date, price, cabin class, direct/connecting",
+          "used_in_phase": 2
+        },
+        {
+          "command": "search-hotel",
+          "description": "Search hotels with filters: city, dates, price range, star rating, bed type, POI proximity",
+          "used_in_phase": 2
+        },
+        {
+          "command": "search-train",
+          "description": "Search train tickets with filters: origin, destination, date, seat class, direct/transit",
+          "used_in_phase": 2
+        },
+        {
+          "command": "search-poi",
+          "description": "Search attractions with filters: city, category (nature/cultural/theme park...), level, keyword",
+          "used_in_phase": 2
+        },
+        {
+          "command": "ai-search",
+          "description": "Semantic AI search for hotels, flights with natural language queries",
+          "used_in_phase": 2
+        },
+        {
+          "command": "keyword-search",
+          "description": "Broad search across hotels, flights, tickets, performances with one natural language query",
+          "used_in_phase": 2
+        }
+      ]
+    }
+  ],
+  "environment_variables": {
+    "FLYAI_API_KEY": "从 flyai.open.fliggy.com 申请的 API Key"
+  },
+  "conversation_phases": [
+    {
+      "phase": 1,
+      "name": "画像采集",
+      "name_en": "Profile Collection",
+      "description": "Collect travel profile: city, budget, days, group, preference tags, exclusions",
+      "max_turns": 3
+    },
+    {
+      "phase": 2,
+      "name": "智能规划",
+      "name_en": "Smart Planning",
+      "description": "Call Fliggy Skill tools to search flights, hotels, attractions; select best destination",
+      "tools_used": ["flight_search", "hotel_search", "attraction_search", "vacation_search"]
+    },
+    {
+      "phase": 3,
+      "name": "盲盒交付",
+      "name_en": "Blind Box Delivery",
+      "description": "Output clue card without revealing destination; surprise value system",
+      "features": ["surprise_value", "peek_option", "clue_card"]
+    },
+    {
+      "phase": 4,
+      "name": "揭晓时刻",
+      "name_en": "The Reveal",
+      "description": "Countdown reveal of destination, flights, hotel, full itinerary and cost breakdown",
+      "features": ["countdown_animation", "travel_prophecy"]
+    },
+    {
+      "phase": 5,
+      "name": "行前锦囊",
+      "name_en": "Travel Prep Kit",
+      "description": "Packing list, hidden gems, emergency info, social media caption",
+      "features": ["packing_list", "hidden_gems", "social_copy"]
+    }
+  ],
+  "surprise_value_rules": {
+    "initial": 100,
+    "max": 160,
+    "peek_cost": 30,
+    "resist_bonus": 20,
+    "prophecy_tiers": [
+      { "min": 120, "label": "命运级惊喜" },
+      { "min": 80, "label": "好运级" },
+      { "min": 0, "label": "探索级" }
+    ]
+  }
+}
